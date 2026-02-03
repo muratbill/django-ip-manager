@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Subnets • IP Manager{% endblock %}
+
+{% block content %}
+  <div class="grid" style="margin-top:16px;">
+    <div class="card">
+      <div class="split">
+        <div>
+          <h2>Subnets</h2>
+          <div class="muted">Utilization and quick access.</div>
+        </div>
+        {% if user.is_staff %}
+          <a class="btn btn-ghost" href="/admin/ipmanager/subnet/">Manage Subnets</a>
+        {% endif %}
+      </div>
+
+      <div style="margin-top:14px;" class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>CIDR</th>
+              <th>Gateway</th>
+              <th>Usable Range</th>
+              <th>Usage</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for r in rows %}
+              <tr>
+                <td><strong>{{ r.subnet.name }}</strong></td>
+                <td class="mono">{{ r.subnet.cidr }}</td>
+                <td class="mono">{{ r.subnet.gateway|default:"-" }}</td>
+                <td class="mono">
+                  {% if r.first_ip and r.last_ip %}
+                    {{ r.first_ip }} — {{ r.last_ip }}
+                  {% else %}
+                    <span class="muted">No usable IPs</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <span class="pill">
+                    <strong>{{ r.used_count }}</strong> used /
+                    <strong>{{ r.free_count }}</strong> free
+                    <span class="muted">(of {{ r.usable_count }})</span>
+                  </span>
+                </td>
+                <td style="text-align:right;">
+                  <a class="btn btn-primary" href="{% url 'subnet_detail' r.subnet.id %}">Open</a>
+                </td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="6" class="muted">No subnets defined yet.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+

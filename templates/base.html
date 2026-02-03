@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}IP Manager{% endblock %}</title>
+  <style>
+    :root{
+      --bg:#0b1220;
+      --card:#111a2e;
+      --muted:#8ea0c7;
+      --text:#e8eeff;
+      --line:#223153;
+      --accent:#4f8cff;
+      --accent2:#22c55e;
+      --warn:#f59e0b;
+      --danger:#ef4444;
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --radius: 16px;
+      --radius-sm: 12px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif;
+    }
+
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      font-family: var(--sans);
+      color:var(--text);
+      background: radial-gradient(1200px 700px at 20% 10%, rgba(79,140,255,.25), transparent 60%),
+                  radial-gradient(1000px 600px at 80% 0%, rgba(34,197,94,.18), transparent 55%),
+                  radial-gradient(900px 600px at 40% 90%, rgba(245,158,11,.12), transparent 55%),
+                  var(--bg);
+      min-height:100vh;
+    }
+
+    a{ color:inherit; text-decoration:none; }
+    a:hover{ text-decoration:underline; }
+
+    .container{
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 24px 18px 40px;
+    }
+
+    .topbar{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:16px;
+      padding: 14px 16px;
+      border:1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(17,26,46,.75);
+      backdrop-filter: blur(10px);
+      box-shadow: var(--shadow);
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      min-width: 0;
+    }
+    .logo{
+      width:36px; height:36px; border-radius:12px;
+      background: linear-gradient(135deg, rgba(79,140,255,.9), rgba(34,197,94,.85));
+      box-shadow: 0 8px 20px rgba(79,140,255,.25);
+      flex: 0 0 auto;
+    }
+    .brand h1{
+      font-size: 16px;
+      margin:0;
+      letter-spacing:.2px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .brand .sub{
+      font-size: 12px;
+      color: var(--muted);
+      margin-top:2px;
+    }
+
+    .nav{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+
+    .pill{
+      padding: 8px 12px;
+      border:1px solid var(--line);
+      border-radius: 999px;
+      color: var(--muted);
+      background: rgba(17,26,46,.6);
+      font-size: 13px;
+    }
+
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      padding: 10px 14px;
+      border-radius: 12px;
+      border:1px solid transparent;
+      cursor:pointer;
+      font-weight: 600;
+      font-size: 14px;
+      transition: transform .05s ease, opacity .15s ease, background .15s ease, border-color .15s ease;
+      user-select:none;
+      white-space:nowrap;
+    }
+    .btn:active{ transform: translateY(1px); }
+    .btn-primary{
+      background: linear-gradient(135deg, rgba(79,140,255,.95), rgba(79,140,255,.7));
+      border-color: rgba(79,140,255,.35);
+      color: white;
+    }
+    .btn-ghost{
+      background: rgba(255,255,255,.04);
+      border-color: var(--line);
+      color: var(--text);
+    }
+    .btn-success{
+      background: rgba(34,197,94,.16);
+      border-color: rgba(34,197,94,.35);
+      color: #d7ffe6;
+    }
+    .btn-danger{
+      background: rgba(239,68,68,.14);
+      border-color: rgba(239,68,68,.35);
+      color: #ffd7d7;
+    }
+
+    .grid{
+      display:grid;
+      gap: 16px;
+      margin-top: 16px;
+    }
+    @media (min-width: 900px){
+      .grid-2{ grid-template-columns: 1.1fr .9fr; }
+    }
+
+    .card{
+      border:1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(17,26,46,.72);
+      backdrop-filter: blur(10px);
+      box-shadow: var(--shadow);
+      padding: 16px;
+    }
+    .card h2,.card h3{
+      margin:0 0 10px;
+      font-size: 16px;
+      letter-spacing:.2px;
+    }
+    .muted{ color: var(--muted); }
+    .mono{ font-family: var(--mono); }
+
+    .kvs{
+      display:grid;
+      grid-template-columns: 160px 1fr;
+      gap: 8px 12px;
+      margin: 10px 0 0;
+      font-size: 14px;
+    }
+    .kvs .k{ color: var(--muted); }
+    .kvs .v{ color: var(--text); }
+
+    .msg{
+      border-radius: 14px;
+      padding: 12px 12px;
+      margin: 12px 0 0;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.04);
+    }
+    .msg.success{ border-color: rgba(34,197,94,.35); background: rgba(34,197,94,.10); }
+    .msg.error{ border-color: rgba(239,68,68,.35); background: rgba(239,68,68,.10); }
+    .msg.info{ border-color: rgba(79,140,255,.35); background: rgba(79,140,255,.10); }
+
+    .form-row{ display:grid; gap: 8px; margin-top: 12px; }
+    label{ font-size: 13px; color: var(--muted); }
+    input[type="text"], input[type="password"], textarea{
+      width:100%;
+      padding: 11px 12px;
+      border-radius: 12px;
+      border:1px solid var(--line);
+      background: rgba(8,12,22,.55);
+      color: var(--text);
+      outline: none;
+    }
+    textarea{ resize: vertical; }
+
+    .table-wrap{ overflow:auto; border-radius: var(--radius); border:1px solid var(--line); }
+    table{
+      width:100%;
+      border-collapse: collapse;
+      min-width: 720px;
+      background: rgba(8,12,22,.35);
+    }
+    th, td{
+      padding: 12px 12px;
+      border-bottom: 1px solid rgba(34,49,83,.65);
+      text-align:left;
+      vertical-align: top;
+      font-size: 13px;
+    }
+    th{ color: var(--muted); font-weight: 700; letter-spacing:.2px; position: sticky; top:0; background: rgba(17,26,46,.92); }
+    tr:hover td{ background: rgba(255,255,255,.03); }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .badge.used{ border-color: rgba(79,140,255,.35); background: rgba(79,140,255,.10); color: #dbe7ff; }
+    .badge.released{ border-color: rgba(142,160,199,.35); background: rgba(142,160,199,.10); color: #dbe7ff; }
+    .badge.free{ border-color: rgba(34,197,94,.35); background: rgba(34,197,94,.10); color: #d7ffe6; }
+
+    .split{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:space-between;
+    }
+
+    .footer{
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: 12px;
+      text-align: center;
+      opacity: .9;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="topbar">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <div style="min-width:0;">
+          <h1>IP Manager</h1>
+          <div class="sub">Lab IP allocation & tracking</div>
+        </div>
+      </div>
+
+      <div class="nav">
+        {% if user.is_authenticated %}
+          <span class="pill">👤 {{ user.username }}</span>
+          <a class="btn btn-ghost" href="{% url 'subnet_list' %}">Subnets</a>
+          <form method="post" action="{% url 'logout' %}" style="display:inline; margin:0;">
+  {% csrf_token %}
+  <button type="submit" class="btn btn-ghost">Logout</button>
+</form>
+
+        {% else %}
+          <a class="btn btn-primary" href="{% url 'login' %}">Login</a>
+        {% endif %}
+      </div>
+    </div>
+
+    {% if messages %}
+      {% for m in messages %}
+        <div class="msg {% if m.tags %}{{ m.tags }}{% else %}info{% endif %}">
+          {{ m }}
+        </div>
+      {% endfor %}
+    {% endif %}
+    {% if messages %}
+  <div style="max-width:1100px; margin: 16px auto 0;">
+    {% for message in messages %}
+      <div class="msg {% if message.tags %}{{ message.tags }}{% endif %}" style="margin-bottom:10px;">
+        {{ message }}
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+
+    {% block content %}{% endblock %}
+
+    <div class="footer">
+      Simple IPManager • Django
+    </div>
+  </div>
+
+</body>
+</html>
+

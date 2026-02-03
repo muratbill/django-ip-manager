@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Django
+*.log
+local_settings.py
+db.sqlite3
+media/
+staticfiles/
+
+# Environment variables (IMPORTANT)
+.env
+.env.*
+!.env.example
+
+# Virtual environments
+venv/
+.envvenv/
+.venv/
+
+# IDEs & editors
+.vscode/
+.idea/
+*.swp
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Tests / coverage
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Migrations cache
+**/__pycache__/
+
+# Poetry
+.poetry/
+poetry.toml
+.venv/
+

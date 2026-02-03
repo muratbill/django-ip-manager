@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Forbidden • IP Manager{% endblock %}
+
+{% block content %}
+  <div class="card" style="max-width: 720px; margin: 70px auto; padding: 24px;">
+    <div class="split" style="align-items: flex-start;">
+      <div>
+        <h2 style="margin:0;">403 — Forbidden</h2>
+        <div class="muted" style="margin-top:8px; line-height:1.5;">
+          You don’t have permission to access this page.
+          <br>
+          If you think this is a mistake, ask a lab admin to grant you access.
+        </div>
+      </div>
+      <div class="badge released" style="font-size: 12px;">Access denied</div>
+    </div>
+
+    <div style="margin-top:18px;" class="kvs">
+      <div class="k">User</div>
+      <div class="v mono">{{ request.user.username|default:"anonymous" }}</div>
+
+      
+    </div>
+
+    <div class="split" style="margin-top:18px;">
+      <a class="btn btn-primary" href="{% url 'subnet_list' %}">Go to Subnets</a>
+      <button class="btn btn-ghost" type="button" onclick="history.back()">← Back</button>
+    </div>
+  </div>
+{% endblock %}
+

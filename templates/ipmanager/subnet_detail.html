@@ -1,0 +1,243 @@
+{% extends "base.html" %}
+{% block title %}{{ subnet.name }} • IP Manager{% endblock %}
+
+{% block content %}
+  <script>
+    function copyText(text){
+      navigator.clipboard.writeText(text).then(() => {
+        const el = document.getElementById("copyToast");
+        el.style.display = "block";
+        el.textContent = "Copied: " + text;
+        setTimeout(() => el.style.display = "none", 1400);
+      });
+    }
+
+    function copyChaseMessage(ip, owner, subnetName, cidr, days){
+      const msg =
+`Hi ${owner},
+IP ${ip} in ${subnetName} (${cidr}) has been allocated for ${days}+ days.
+If the VM is no longer running, please release the IP in IP Manager. Thanks.`;
+      copyText(msg);
+    }
+  </script>
+
+  <div id="copyToast" class="msg success" style="display:none; position: fixed; right: 16px; bottom: 16px; max-width: 420px;"></div>
+
+  <div class="grid grid-2" style="margin-top:16px;">
+    <!-- LEFT COLUMN -->
+    <div class="card">
+      <div class="split">
+        <div>
+          <h2>{{ subnet.name }}</h2>
+          <div class="muted mono">{{ subnet.cidr }}</div>
+        </div>
+        <a class="btn btn-ghost" href="{% url 'subnet_list' %}">← Back</a>
+      </div>
+
+      {% if stale_count > 0 %}
+        <div class="msg" style="border-color: rgba(245,158,11,.45); background: rgba(245,158,11,.12); margin-top: 12px;">
+          <strong>⚠ {{ stale_count }} stale IP(s)</strong> (USED for <strong>{{ stale_days }}+ days</strong>)
+          <span class="muted">— admins can export CSV or copy chase messages.</span>
+        </div>
+      {% endif %}
+
+      <div class="kvs">
+        <div class="k">Gateway</div>
+        <div class="v mono">{{ subnet.gateway|default:"-" }}</div>
+
+        <div class="k">Usable range</div>
+        <div class="v mono">
+          {% if first_ip and last_ip %}
+            {{ first_ip }} — {{ last_ip }}
+          {% else %}
+            <span class="muted">No usable IPs</span>
+          {% endif %}
+        </div>
+
+        <div class="k">Excluded</div>
+        <div class="v mono">
+          {% if subnet.excluded_set %}
+            {% for ip in subnet.excluded_set %}
+              <span class="pill mono" style="display:inline-block; margin: 2px 0;">{{ ip }}</span>
+            {% endfor %}
+          {% else %}
+            <span class="muted">None</span>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="split" style="margin-top:14px;">
+        <form method="get" action="" style="margin:0;">
+          <input type="hidden" name="check_free" value="1">
+          <button class="btn btn-ghost" type="submit">Find free IP</button>
+        </form>
+
+        {% if free_ip %}
+          <span class="badge free" style="gap:10px;">
+            Free: <span class="mono">{{ free_ip }}</span>
+            <button class="btn btn-success" type="button" onclick="copyText('{{ free_ip }}')" style="padding:6px 10px; border-radius:10px;">Copy</button>
+          </span>
+        {% elif request.GET.check_free == "1" %}
+          <span class="badge released">No free IP</span>
+        {% endif %}
+      </div>
+
+      <div class="card" style="margin-top:14px; padding:14px; border-radius: var(--radius-sm);">
+        <h3 style="margin-bottom:8px;">Claim first free IP</h3>
+
+        <form method="post" action="{% url 'claim_ip' subnet.id %}">
+          {% csrf_token %}
+          <div class="form-row">
+            <label>IP (optional)</label>
+            {{ form.requested_ip }}
+            <div class="muted" style="margin-top:6px;">Leave empty to claim the first free IP.</div>
+            <label>Hostname / VM name</label>
+            {{ form.hostname }}
+          </div>
+          <div class="form-row">
+            <label>Description</label>
+            {{ form.description }}
+          </div>
+          <div class="split" style="margin-top:12px;">
+            <button class="btn btn-primary" type="submit">Claim</button>
+            <a class="btn btn-ghost" href="?check_free=1">Check free</a>
+          </div>
+        </form>
+      </div>
+
+      {% if user.is_staff and stale_count > 0 %}
+        <div class="card" style="margin-top:14px; padding:14px; border-radius: var(--radius-sm); border-color: rgba(245,158,11,.35);">
+          <div class="split">
+            <h3 style="margin:0;">Stale report ({{ stale_days }}+ days)</h3>
+            <a class="btn btn-ghost" href="{% url 'stale_csv' subnet.id %}">Download CSV</a>
+          </div>
+          <div class="muted" style="margin:8px 0 10px;">
+            Use this list to chase owners (Teams/Slack). Buttons copy IP, owner, or a ready message.
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>IP</th>
+                  <th>Owner</th>
+                  <th>Hostname</th>
+                  <th>Age</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for s in stale_allocations %}
+                  <tr>
+                    <td class="mono"><strong>{{ s.ip }}</strong></td>
+                    <td><strong>{{ s.owner.username }}</strong></td>
+                    <td class="mono">{{ s.hostname|default:"-" }}</td>
+                    <td class="muted">{{ s.claimed_at|timesince }} ago</td>
+                    <td style="text-align:right; white-space:nowrap;">
+                      <button class="btn btn-success" type="button" onclick="copyText('{{ s.ip }}')" style="padding:8px 10px;">Copy IP</button>
+                      <button class="btn btn-ghost" type="button" onclick="copyText('{{ s.owner.username }}')" style="padding:8px 10px;">Copy user</button>
+                      <button class="btn btn-ghost" type="button"
+                              onclick="copyChaseMessage('{{ s.ip }}','{{ s.owner.username }}','{{ subnet.name }}','{{ subnet.cidr }}','{{ stale_days }}')"
+                              style="padding:8px 10px;">
+                        Copy message
+                      </button>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- RIGHT COLUMN -->
+    <div class="card">
+      <div class="split">
+        <div>
+          <h2>Allocations</h2>
+          <div class="muted">Search + quick filters. Stale ({{ stale_days }}+ days) rows are highlighted.</div>
+        </div>
+      </div>
+
+      <form method="get" style="margin-top:12px;">
+        <div class="split" style="gap:10px;">
+          <div style="flex:1; min-width:240px;">
+            <input type="text" name="q" value="{{ q }}" placeholder="Search… (IP, owner, hostname, description)">
+          </div>
+
+          <label class="pill" style="display:flex; gap:8px; align-items:center;">
+            <input type="checkbox" name="mine" value="1" {% if mine %}checked{% endif %}>
+            Mine
+          </label>
+
+          <label class="pill" style="display:flex; gap:8px; align-items:center;">
+            <input type="checkbox" name="used" value="1" {% if used_only %}checked{% endif %}>
+            Used only
+          </label>
+
+          <label class="pill" style="display:flex; gap:8px; align-items:center;">
+            <input type="checkbox" name="stale" value="1" {% if stale_only %}checked{% endif %}>
+            Stale only
+          </label>
+
+          <button class="btn btn-ghost" type="submit">Apply</button>
+          <a class="btn btn-ghost" href="{% url 'subnet_detail' subnet.id %}">Reset</a>
+        </div>
+      </form>
+
+      <div class="table-wrap" style="margin-top:12px;">
+        <table>
+          <thead>
+            <tr>
+              <th>IP</th>
+              <th>Status</th>
+              <th>Owner</th>
+              <th>Hostname</th>
+              <th>Claimed</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for a in allocations %}
+              <tr {% if a.status == "USED" and a.claimed_at <= stale_cutoff %}style="outline: 2px solid rgba(245,158,11,.25); background: rgba(245,158,11,.07);" {% endif %}>
+                <td class="mono"><strong>{{ a.ip }}</strong></td>
+                <td>
+                  {% if a.status == "USED" %}
+                    <span class="badge used">USED</span>
+                  {% else %}
+                    <span class="badge released">RELEASED</span>
+                  {% endif %}
+                </td>
+                <td>{{ a.owner.username }}</td>
+                <td class="mono">{{ a.hostname|default:"-" }}</td>
+                <td class="muted">{{ a.claimed_at|date:"Y-m-d H:i" }}</td>
+
+                <td style="text-align:right; white-space:nowrap;">
+                  <button class="btn btn-success" type="button" onclick="copyText('{{ a.ip }}')" style="padding:8px 10px;">Copy</button>
+
+                  {% if a.status != "RELEASED" %}
+                    {% if user.is_staff or user.id == a.owner_id %}
+                      <form method="post" action="{% url 'release_ip' a.id %}" style="margin:6px 0 0;">
+                        {% csrf_token %}
+                        <button class="btn btn-danger" type="submit">Release</button>
+                      </form>
+                    {% endif %}
+                  {% endif %}
+                </td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="6" class="muted">No allocations found.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+       
+
+      <div style="margin-top:12px;" class="muted">
+        Tip: stale highlights are just a visual indicator; release old IPs when the VM is gone.
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
