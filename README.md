@@ -4,9 +4,9 @@
 
 
 A clean and modern **Django-based IP Management (IPAM)** application, built with:
-- 🐍 Django
+- 🐍 Django 6.0
 - 📦 Poetry for dependency management
-- 🐘 PostgreSQL for persistence
+- 🐘 PostgreSQL 16 for persistence
 - 🔐 `.env`-based configuration for security
 
 Designed for **local development on Ubuntu** and easy future expansion.
