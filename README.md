@@ -4,10 +4,10 @@
 
 
 A clean and modern **Django-based IP Management (IPAM)** application, built with:
-- 🐍 Django 6.0
-- 📦 Poetry for dependency management
-- 🐘 PostgreSQL 16 for persistence
-- 🔐 `.env`-based configuration for security
+- Django 6.0
+- Poetry for dependency management
+- PostgreSQL 16 for persistence
+- `.env`-based configuration for security
 
 Designed for **local development on Ubuntu** and easy future expansion.
 
@@ -28,7 +28,7 @@ sudo apt install -y \
   postgresql postgresql-contrib \
   libpq-dev build-essential
 
-📦 Install Poetry
+Install Poetry
 python3 -m pip install --user pipx
 python3 -m pipx ensurepath
 
@@ -36,7 +36,7 @@ python3 -m pipx ensurepath
 pipx install poetry
 poetry --version
 
-🐘 PostgreSQL Setup (Local Development)
+PostgreSQL Setup (Local Development)
 Create Database & User
 
 sudo -u postgres psql
@@ -57,7 +57,7 @@ CREATE SCHEMA <yourschema> AUTHORIZATION <youruser>;
 ALTER ROLE <youruser> SET search_path = <yourschema>, public;
 \q
 
-🐍 Create Django Project with Poetry
+Create Django Project with Poetry
 mkdir ip-django
 cd ip-django
 poetry init -n
@@ -82,3 +82,4 @@ Quick sanity test (should work without sudo):
 arping -c 1 -I wlo1 192.168.1.1
 echo $?
 # 0 means ARP reply OK
+```
