@@ -87,3 +87,56 @@ arping -c 1 -I wlo1 192.168.1.1
 echo $?
 # 0 means ARP reply OK
 ```
+
+---
+
+## 🔐 Security Notice: Free IP Detection (ARP Usage)
+
+This project optionally uses **ARP-based probing** to detect free IP addresses on the **local Layer-2 network**.
+
+### Why ARP is used
+To reliably determine whether an IP address is already in use, the application may send **ARP requests** using the `arping` utility. This is a common and industry-accepted technique used by:
+- DHCP servers
+- IPAM systems
+- Virtualization platforms
+- Container networking plugins
+
+ARP operates strictly at **Layer 2 (local subnet only)** and does **not** perform:
+- Port scanning
+- Service enumeration
+- Authentication attempts
+- Remote network discovery
+
+### Privilege model
+To avoid running the application as `root`, the binary `arping` may be granted the Linux capability:
+
+```bash
+cap_net_raw
+
+This capability is narrowly scoped and allows only the creation of raw network packets required for ARP. It does not grant:
+
+File system access
+
+Packet sniffing
+
+Privilege escalation
+
+Network configuration changes
+
+Network impact
+
+ARP requests are small broadcast frames
+
+Requests are limited to the local subnet
+
+No parallel or aggressive scanning is performed by default
+
+On typical networks (e.g. /24 or /23), the traffic impact is negligible and safe for lab and enterprise environments.
+
+Important notice for users
+
+ARP-based probing should only be used on networks you own or are authorized to operate
+
+Some enterprise security environments may flag raw socket usage for review
+
+If required by policy, ARP probing can be disabled or replaced with passive detection methods
