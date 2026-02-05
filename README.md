@@ -112,6 +112,7 @@ To avoid running the application as `root`, the binary `arping` may be granted t
 
 ```bash
 cap_net_raw
+```
 
 This capability is narrowly scoped and allows only the creation of raw network packets required for ARP. It does not grant:
 
