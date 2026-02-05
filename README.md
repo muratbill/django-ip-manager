@@ -29,8 +29,12 @@ sudo apt install -y \
   libpq-dev build-essential
 
 Install Poetry
-python3 -m pip install --user pipx
-python3 -m pipx ensurepath
+sudo apt install pipx -y
+pipx ensurepath
+
+Enable Auto-Completion for Pipx Commands:
+echo 'eval "$(register-python-argcomplete pipx)"' >> ~/.bashrc
+source ~/.bashrc
 
 ⚠️ Reopen your terminal (or source your shell rc file) after this step.
 pipx install poetry
