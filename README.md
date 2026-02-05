@@ -116,25 +116,25 @@ cap_net_raw
 
 This capability is narrowly scoped and allows only the creation of raw network packets required for ARP. It does not grant:
 
-File system access
+- File system access
 
-Packet sniffing
+- Packet sniffing
 
-Privilege escalation
+- Privilege escalation
 
-Network configuration changes
+- Network configuration changes
 
-Network impact
+Network impact:
 
-ARP requests are small broadcast frames
+- ARP requests are small broadcast frames
 
-Requests are limited to the local subnet
+- Requests are limited to the local subnet
 
-No parallel or aggressive scanning is performed by default
+-  No parallel or aggressive scanning is performed by default
 
-On typical networks (e.g. /24 or /23), the traffic impact is negligible and safe for lab and enterprise environments.
+- On typical networks (e.g. /24 or /23), the traffic impact is negligible and safe for lab and enterprise environments.
 
-Important notice for users
+### Important notice for users
 
 ARP-based probing should only be used on networks you own or are authorized to operate
 
