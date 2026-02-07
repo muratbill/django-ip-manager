@@ -67,9 +67,14 @@ cd ip-django
 poetry init -n
 poetry env use python3
 
+
 Add Dependencies:
 poetry add "django==6.*" psycopg[binary]
 poetry add --group dev python-dotenv
+
+Creating templates and subfolders , also creating static folder:
+mkdir -p templates/registration templates/ipmanager
+mkdir static
 
 Create Django Project & App
 poetry run django-admin startproject config .
